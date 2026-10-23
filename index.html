@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="面向不同计算机职业的交互式技能知识图谱">
+  <meta name="theme-color" content="#0b1015">
+  <title>Skill Graph · 职业技能图谱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">跳到主要内容</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" id="brandHome" href="#overview/linux" aria-label="返回技能图谱领域总览">
+        <span class="brand-mark"><i data-lucide="network"></i></span>
+        <span><strong>SKILL GRAPH</strong><small>ROLE LENS</small></span>
+      </a>
+      <nav class="top-nav" aria-label="主导航">
+        <button class="nav-tab active" type="button">技能树</button>
+        <button class="nav-tab" type="button" id="roadmapButton">路线总览</button>
+      </nav>
+      <div class="header-progress">
+        <span class="rank-label">当前等级</span><strong id="rankName">见习工程师</strong>
+        <div class="progress-track" aria-label="总学习进度"><span id="headerProgress"></span></div>
+        <b id="progressText">0 / 425</b>
+      </div>
+    </header>
+
+    <main class="workspace" id="mainContent">
+      <aside class="left-panel" id="leftPanel" aria-label="学习路线控制">
+        <section class="profile-block">
+          <span class="eyebrow">LEARNING PATH</span>
+          <h1>职业技能<br>知识图谱</h1>
+          <p>选择职业视图，查看同一套计算机技能如何组合成不同能力路径。</p>
+        </section>
+        <section class="role-section" aria-labelledby="roleLensTitle">
+          <div class="section-title"><span id="roleLensTitle">职业视图</span><span class="source-badge" id="graphSourceBadge">目录</span></div>
+          <label class="role-select-wrap"><span class="sr-only">选择职业</span><select id="roleSelect" aria-label="选择职业"></select></label>
+          <p class="role-summary" id="roleSummary">选择职业后，图谱会显示其更相关的技能组和证据强度。</p>
+          <label class="role-toggle"><input id="roleFocusOnly" type="checkbox"><span>仅显示职业相关技能</span></label>
+        </section>
+        <section class="category-section">
+          <div class="section-title"><span>能力板块</span><button class="icon-button" id="showAllButton" type="button" title="显示全部领域" aria-label="显示全部领域"><i data-lucide="layers-3"></i></button></div>
+          <div class="category-list" id="categoryList"></div>
+        </section>
+        <section class="mission-card">
+          <span class="mission-kicker"><i data-lucide="crosshair"></i> 当前任务</span>
+          <strong id="missionTitle">学习 Shell 与管道</strong>
+          <p id="missionDescription">Linux 系统 · 预计 3 小时</p>
+          <div class="mission-progress"><span id="missionProgress"></span></div>
+          <small id="missionMeta">0 / 3 个技能</small>
+        </section>
+        <button class="reset-button" id="resetButton" type="button"><i data-lucide="rotate-ccw"></i>重置学习进度</button>
+      </aside>
+
+      <section class="tree-section" aria-label="技能树画布">
+        <div class="tree-toolbar">
+          <label class="search-box"><i data-lucide="search"></i><span class="sr-only">搜索技能</span><input id="searchInput" name="skill-search" type="search" placeholder="搜索技能…" autocomplete="off"><kbd>/</kbd></label>
+          <button class="mobile-category-button" id="mobileCategoryButton" type="button"><i data-lucide="list-filter"></i> 分类</button>
+          <div class="view-filters" role="group" aria-label="状态筛选">
+            <button type="button" class="filter-button active" data-filter="all">全部</button>
+            <button type="button" class="filter-button" data-filter="available">可学习</button>
+            <button type="button" class="filter-button" data-filter="completed">已掌握</button>
+          </div>
+          <div class="zoom-controls" role="group" aria-label="缩放控制">
+            <button class="icon-button" id="zoomOut" type="button" title="缩小" aria-label="缩小"><i data-lucide="minus"></i></button><output id="zoomValue">100%</output><button class="icon-button" id="zoomIn" type="button" title="放大" aria-label="放大"><i data-lucide="plus"></i></button><button class="icon-button" id="fitView" type="button" title="适应画布" aria-label="适应画布"><i data-lucide="scan"></i></button>
+          </div>
+        </div>
+        <div class="tree-viewport" id="treeViewport">
+          <div class="context-bar">
+            <button class="context-back" id="backToDomains" type="button" hidden><i data-lucide="arrow-left"></i> 领域总览</button>
+            <span id="contextBreadcrumb">AI INFRA / 全局领域图</span>
+            <strong id="contextTitle">领域总览</strong>
+            <small id="contextMeta">10 个领域 · 选择领域查看内部技能</small>
+          </div>
+          <div class="tree-canvas" id="treeCanvas"><div class="stage-bands" id="stageBands"></div><svg class="connection-layer" id="connectionLayer" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M 0 0 L 7 3.5 L 0 7 z"></path></marker></defs></svg><div class="nodes-layer" id="nodesLayer"></div></div>
+          <div class="canvas-hint"><i data-lucide="move"></i> 拖动画布 · 滚轮缩放</div>
+          <div class="legend" aria-label="节点状态图例"><span><i class="legend-dot complete"></i>已掌握</span><span><i class="legend-dot available"></i>可学习</span><span><i class="legend-dot locked"></i>未解锁</span><span><i class="legend-arrow"></i>前置 → 后置</span></div>
+        </div>
+      </section>
+
+      <aside class="detail-panel" id="detailPanel" aria-label="技能详情">
+        <button class="close-detail icon-button" id="closeDetail" type="button" aria-label="关闭详情"><i data-lucide="x"></i></button>
+        <div id="detailContent"></div>
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="modal-backdrop" id="modalBackdrop" hidden>
+      <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-icon"><i data-lucide="rotate-ccw"></i></div><h2 id="modalTitle">重置学习进度？</h2><p>所有已掌握的技能都会恢复为未学习状态。</p>
+        <div class="modal-actions"><button class="secondary-button" id="cancelReset" type="button">取消</button><button class="danger-button" id="confirmReset" type="button">确认重置</button></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

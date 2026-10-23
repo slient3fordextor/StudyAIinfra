@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environments and IDE metadata
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.codex/
+
+# Runtime and generated files
+*.log
+*.pid
+neo4j/data/
+neo4j/logs/
+neo4j/plugins/
+neo4j/import/
+node_modules/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
