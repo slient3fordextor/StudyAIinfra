@@ -7,7 +7,9 @@ from urllib.parse import parse_qs, urlparse
 from graph_store import KnowledgeGraph
 
 
-HOST = "127.0.0.1"
+# Bind all interfaces so the service is reachable through a container port
+# publish (local development can still use http://127.0.0.1:8000).
+HOST = os.getenv("HOST", "0.0.0.0")
 PORT = 8000
 
 

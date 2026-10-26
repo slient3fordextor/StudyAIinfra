@@ -9,16 +9,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261026-3">
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=20261026-3" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#mainContent">跳到主要内容</a>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" id="brandHome" href="#overview/linux" aria-label="返回技能图谱领域总览">
-        <span class="brand-mark"><i data-lucide="network"></i></span>
+        <span class="brand-mark"><svg class="fallback-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="12" cy="19" r="2"/><path d="m7 6 10 1M6 7l5 10M18 9l-5 8"/></svg></span>
         <span><strong>SKILL GRAPH</strong><small>ROLE LENS</small></span>
       </a>
       <nav class="top-nav" aria-label="主导航">
@@ -39,35 +39,59 @@
           <h1>职业技能<br>知识图谱</h1>
           <p>选择职业视图，查看同一套计算机技能如何组合成不同能力路径。</p>
         </section>
+        <section class="overview-card" aria-label="学习概览">
+          <div class="overview-card-head"><span class="eyebrow">AT A GLANCE</span><strong id="overviewPercent">0%</strong></div>
+          <div class="overview-meter" aria-hidden="true"><span id="overviewMeter"></span></div>
+          <div class="overview-stats">
+            <div><strong id="completedCount">0</strong><span>已掌握</span></div>
+            <div><strong id="availableCount">0</strong><span>可学习</span></div>
+            <div><strong id="remainingHours">0h</strong><span>剩余投入</span></div>
+          </div>
+        </section>
         <section class="role-section" aria-labelledby="roleLensTitle">
           <div class="section-title"><span id="roleLensTitle">职业视图</span><span class="source-badge" id="graphSourceBadge">目录</span></div>
           <label class="role-select-wrap"><span class="sr-only">选择职业</span><select id="roleSelect" aria-label="选择职业"></select></label>
           <p class="role-summary" id="roleSummary">选择职业后，图谱会显示其更相关的技能组和证据强度。</p>
           <label class="role-toggle"><input id="roleFocusOnly" type="checkbox"><span>仅显示职业相关技能</span></label>
         </section>
+        <section class="evidence-section" aria-labelledby="evidenceTitle">
+          <div class="section-title"><span id="evidenceTitle">证据状态</span><span class="source-badge">可审阅</span></div>
+          <div class="evidence-counts"><span><b id="verifiedCount">0</b>有来源</span><span><b id="reviewCount">0</b>需复核</span></div>
+          <details class="candidate-disclosure">
+            <summary>待验证池 <b id="candidateCount">0</b></summary>
+            <div class="candidate-list" id="candidateList"></div>
+          </details>
+        </section>
         <section class="category-section">
           <div class="section-title"><span>能力板块</span><button class="icon-button" id="showAllButton" type="button" title="显示全部领域" aria-label="显示全部领域"><i data-lucide="layers-3"></i></button></div>
           <div class="category-list" id="categoryList"></div>
         </section>
         <section class="mission-card">
-          <span class="mission-kicker"><i data-lucide="crosshair"></i> 当前任务</span>
+          <span class="mission-kicker"><svg class="fallback-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> 当前任务</span>
           <strong id="missionTitle">学习 Shell 与管道</strong>
           <p id="missionDescription">Linux 系统 · 预计 3 小时</p>
           <div class="mission-progress"><span id="missionProgress"></span></div>
           <small id="missionMeta">0 / 3 个技能</small>
+          <button class="mission-action" id="continueButton" type="button"><span class="mission-action-copy"><small>下一步</small><b id="continueLabel">打开知识点</b></span><svg class="fallback-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </section>
         <button class="reset-button" id="resetButton" type="button"><i data-lucide="rotate-ccw"></i>重置学习进度</button>
       </aside>
 
       <section class="tree-section" aria-label="技能树画布">
         <div class="tree-toolbar">
-          <label class="search-box"><i data-lucide="search"></i><span class="sr-only">搜索技能</span><input id="searchInput" name="skill-search" type="search" placeholder="搜索技能…" autocomplete="off"><kbd>/</kbd></label>
+          <div class="search-box"><i data-lucide="search"></i><label class="sr-only" for="searchInput">搜索技能</label><input id="searchInput" name="skill-search" type="search" placeholder="搜索技能…" autocomplete="off"><button class="clear-search" id="clearSearch" type="button" aria-label="清空搜索" hidden><i data-lucide="x"></i></button><kbd>/</kbd></div>
           <button class="mobile-category-button" id="mobileCategoryButton" type="button"><i data-lucide="list-filter"></i> 分类</button>
           <div class="view-filters" role="group" aria-label="状态筛选">
             <button type="button" class="filter-button active" data-filter="all">全部</button>
             <button type="button" class="filter-button" data-filter="available">可学习</button>
             <button type="button" class="filter-button" data-filter="completed">已掌握</button>
           </div>
+          <div class="evidence-filters" role="group" aria-label="证据筛选">
+            <button type="button" class="filter-button active" data-evidence="all">证据：全部</button>
+            <button type="button" class="filter-button" data-evidence="verified">有来源</button>
+            <button type="button" class="filter-button" data-evidence="review">需复核</button>
+          </div>
+          <span class="result-summary" id="resultSummary" aria-live="polite">10 个领域</span>
           <div class="zoom-controls" role="group" aria-label="缩放控制">
             <button class="icon-button" id="zoomOut" type="button" title="缩小" aria-label="缩小"><i data-lucide="minus"></i></button><output id="zoomValue">100%</output><button class="icon-button" id="zoomIn" type="button" title="放大" aria-label="放大"><i data-lucide="plus"></i></button><button class="icon-button" id="fitView" type="button" title="适应画布" aria-label="适应画布"><i data-lucide="scan"></i></button>
           </div>
@@ -79,7 +103,7 @@
             <strong id="contextTitle">领域总览</strong>
             <small id="contextMeta">10 个领域 · 选择领域查看内部技能</small>
           </div>
-          <div class="tree-canvas" id="treeCanvas"><div class="stage-bands" id="stageBands"></div><svg class="connection-layer" id="connectionLayer" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M 0 0 L 7 3.5 L 0 7 z"></path></marker></defs></svg><div class="nodes-layer" id="nodesLayer"></div></div>
+          <div class="tree-canvas" id="treeCanvas"><svg class="connection-layer" id="connectionLayer" aria-hidden="true"><defs><marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M 0 0 L 7 3.5 L 0 7 z"></path></marker></defs></svg><div class="nodes-layer" id="nodesLayer"></div></div>
           <div class="canvas-hint"><i data-lucide="move"></i> 拖动画布 · 滚轮缩放</div>
           <div class="legend" aria-label="节点状态图例"><span><i class="legend-dot complete"></i>已掌握</span><span><i class="legend-dot available"></i>可学习</span><span><i class="legend-dot locked"></i>未解锁</span><span><i class="legend-arrow"></i>前置 → 后置</span></div>
         </div>

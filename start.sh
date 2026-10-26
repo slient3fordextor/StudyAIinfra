@@ -23,13 +23,16 @@ if command -v podman >/dev/null 2>&1; then
   podman volume exists "$VOLUME" || podman volume create "$VOLUME" >/dev/null
   podman rm -f skillgraph-app skillgraph-neo4j >/dev/null 2>&1 || true
 
+  # Keep the source files outside Neo4j's startup chown path. The image changes
+  # ownership below its import directory, which would otherwise alter the host
+  # checkout (or fail when the directory is read-only).
   podman run -d --name skillgraph-neo4j --network "$NETWORK" \
     -p 7474:7474 -p 7687:7687 \
     -e "NEO4J_AUTH=neo4j/$NEO4J_PASSWORD" \
-    -e "NEO4J_PASSWORD=$NEO4J_PASSWORD" \
+    -e "GRAPH_DB_PASSWORD=$NEO4J_PASSWORD" \
     -e NEO4J_server_memory_heap_initial__size=256m \
     -e NEO4J_server_memory_heap_max__size=512m \
-    -v "$VOLUME:/data" -v "$ROOT_DIR/neo4j:/var/lib/neo4j/import:ro,Z" \
+    -v "$VOLUME:/data" \
     "$NEO4J_IMAGE" >/dev/null
 
   echo "Waiting for Neo4j…"
@@ -43,11 +46,18 @@ if command -v podman >/dev/null 2>&1; then
       exit 1
     fi
   done
+  podman cp "$ROOT_DIR/neo4j/schema.cypher" skillgraph-neo4j:/var/lib/neo4j/import/schema.cypher >/dev/null
+  podman cp "$ROOT_DIR/neo4j/seed.cypher" skillgraph-neo4j:/var/lib/neo4j/import/seed.cypher >/dev/null
   podman exec skillgraph-neo4j cypher-shell -u neo4j -p "$NEO4J_PASSWORD" -f /var/lib/neo4j/import/schema.cypher >/dev/null
   podman exec skillgraph-neo4j cypher-shell -u neo4j -p "$NEO4J_PASSWORD" -f /var/lib/neo4j/import/seed.cypher >/dev/null
   podman build --build-arg "PYTHON_IMAGE=${PYTHON_IMAGE:-docker.m.daocloud.io/library/python:3.12-slim}" -t skillgraph-app . >/dev/null
+  NEO4J_ADDRESS="$(podman inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' skillgraph-neo4j)"
+  if [ -z "$NEO4J_ADDRESS" ]; then
+    echo "Could not determine the Neo4j container address" >&2
+    exit 1
+  fi
   podman run -d --name skillgraph-app --network "$NETWORK" -p 8000:8000 \
-    -e NEO4J_URI=neo4j://skillgraph-neo4j:7687 -e NEO4J_USERNAME=neo4j \
+    -e "NEO4J_URI=neo4j://$NEO4J_ADDRESS:7687" -e NEO4J_USERNAME=neo4j \
     -e "NEO4J_PASSWORD=$NEO4J_PASSWORD" skillgraph-app >/dev/null
   echo "Skill Graph running at http://127.0.0.1:8000 (Neo4j-backed)"
   exit 0

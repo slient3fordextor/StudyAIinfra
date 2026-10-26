@@ -15,6 +15,7 @@ ROLE_PROFILES: dict[str, dict[str, Any]] = {
     "ai-infra": {
         "id": "ai-infra",
         "name": "AI Infra 工程师",
+        "core": True,
         "summary": "把训练、推理和平台基础设施做成可观测、可扩展的生产系统。",
         "color": "#d77ad6",
         "focusDomains": ["linux", "gpu", "pytorch", "distributed", "platform", "serving", "reliability"],
@@ -27,6 +28,24 @@ ROLE_PROFILES: dict[str, dict[str, Any]] = {
             {"id": "reliability", "relevance": 0.90, "confidence": 0.88, "evidence": "SLO、容量和故障恢复"},
             {"id": "network", "relevance": 0.82, "confidence": 0.90, "evidence": "服务发现、集合通信与流量路径"},
             {"id": "python", "relevance": 0.78, "confidence": 0.89, "evidence": "自动化、控制面和工具链"},
+        ],
+    },
+    "ai-app": {
+        "id": "ai-app",
+        "name": "AI 应用开发",
+        "core": True,
+        "summary": "把模型能力变成可评测、可观测、可交付的产品功能。",
+        "color": "#f178a5",
+        "focusDomains": ["application", "llm", "rag", "agents", "evals", "safety", "serving", "reliability"],
+        "skills": [
+            {"id": "application", "relevance": 0.98, "confidence": 0.90, "evidence": "应用架构、API 与状态管理是交付 AI 功能的共同边界"},
+            {"id": "llm", "relevance": 0.98, "confidence": 0.88, "evidence": "模型 API、结构化输出与工具调用官方文档"},
+            {"id": "rag", "relevance": 0.93, "confidence": 0.82, "evidence": "检索、引用和数据管线已有成熟实践，具体组合需按场景验证"},
+            {"id": "agents", "relevance": 0.90, "confidence": 0.78, "evidence": "工具调用与编排模式仍在快速演进，需以评测结果为准"},
+            {"id": "evals", "relevance": 0.96, "confidence": 0.85, "evidence": "离线数据集、回归评测与线上质量闭环"},
+            {"id": "safety", "relevance": 0.94, "confidence": 0.83, "evidence": "提示注入、隐私与审计控制需要按产品风险验证"},
+            {"id": "serving", "relevance": 0.82, "confidence": 0.86, "evidence": "模型 API、流式输出与容量控制"},
+            {"id": "reliability", "relevance": 0.78, "confidence": 0.84, "evidence": "可观测性、SLO 与故障降级"},
         ],
     },
     "ml-platform": {
@@ -127,8 +146,10 @@ class KnowledgeGraph:
         MATCH (r:Role {id: $role_id})
         OPTIONAL MATCH (r)-[rel:REQUIRES]->(s:Skill)
         RETURN r.id AS id, r.name AS name, r.summary AS summary,
-               r.color AS color, collect({id:s.id, relevance:rel.relevance,
-               confidence:rel.confidence, evidence:rel.evidence}) AS skills
+               r.color AS color, r.core AS core,
+               collect({id:s.id, relevance:rel.relevance,
+               confidence:rel.confidence, evidence:rel.evidence,
+               evidenceStatus:s.evidence_status, sourceUrl:s.source_url}) AS skills
         """
         try:
             with self.driver.session() as session:
@@ -150,6 +171,7 @@ class KnowledgeGraph:
             "name": profile["name"],
             "summary": profile["summary"],
             "color": profile["color"],
+            "core": profile.get("core", False),
             "focusDomains": profile["focusDomains"],
             "skillCount": len(profile["skills"]),
         }
